@@ -23,9 +23,48 @@ def select_mode():
         print("입력 오류: 1 또는 2를 입력하세요.")
 
 
+def input_matrix(name, size):
+    print(name + " (" + str(size) + "줄 입력, 공백 구분)")
+    matrix = []
+
+    while len(matrix) < size:
+        parts = input().split()
+
+        if len(parts) != size:
+            print("입력 형식 오류: 각 줄에 " + str(size) + "개의 숫자를 공백으로 구분해 입력하세요.")
+            continue
+
+        row = []
+        try:
+            for part in parts:
+                row.append(float(part))
+        except ValueError:
+            print("입력 형식 오류: 숫자만 입력하세요.")
+            continue
+
+        matrix.append(row)
+
+    return matrix
+
+
 def run_user_mode():
+    size = 3
+
     print_section("[1] 필터 입력")
-    print("(준비 중) 다음 단계에서 만듭니다.")
+    filter_a = input_matrix("필터 A", size)
+    print()
+    filter_b = input_matrix("필터 B", size)
+    print("✓ 필터 A, B 저장 완료")
+
+    print_section("[2] 패턴 입력")
+    pattern = input_matrix("패턴", size)
+    print("✓ 패턴 저장 완료")
+
+    # 확인용 출력: 다음 단계에서 MAC 계산으로 바꾼다
+    print()
+    print("필터 A:", filter_a)
+    print("필터 B:", filter_b)
+    print("패턴:", pattern)
 
 
 def run_json_mode():
@@ -48,4 +87,3 @@ try:
 except (KeyboardInterrupt, EOFError):
     print()
     print("입력이 중단되었습니다. 프로그램을 종료합니다.")
-    
