@@ -47,6 +47,17 @@ def input_matrix(name, size):
     return matrix
 
 
+def mac(pattern, filter_matrix):
+    size = len(pattern)
+    total = 0.0
+
+    for i in range(size):
+        for j in range(size):
+            total += pattern[i][j] * filter_matrix[i][j]
+
+    return total
+
+
 def run_user_mode():
     size = 3
 
@@ -60,11 +71,11 @@ def run_user_mode():
     pattern = input_matrix("패턴", size)
     print("✓ 패턴 저장 완료")
 
-    # 확인용 출력: 다음 단계에서 MAC 계산으로 바꾼다
-    print()
-    print("필터 A:", filter_a)
-    print("필터 B:", filter_b)
-    print("패턴:", pattern)
+    print_section("[3] MAC 결과")
+    score_a = mac(pattern, filter_a)
+    score_b = mac(pattern, filter_b)
+    print("A 점수:", score_a)
+    print("B 점수:", score_b)
 
 
 def run_json_mode():
