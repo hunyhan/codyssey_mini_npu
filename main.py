@@ -256,7 +256,6 @@ def run_json_mode():
     filters = load_filters(data)
 
     print_section("[2] 패턴 분석 (라벨 정규화 적용)")
-
     results = []
     for key, case in data["patterns"].items():
         passed, reason = analyze_pattern(key, case, filters)
@@ -264,6 +263,7 @@ def run_json_mode():
 
     print_performance(3, PERF_SIZES)
     print_summary(results)
+
 
 def main():
     print("╔════════════════════════════════════╗")
