@@ -7,6 +7,7 @@ import time
 EPSILON = 1e-9
 REPEAT = 10
 DATA_FILE = "data.json"
+PERF_SIZES = [3, 5, 13, 25]
 
 
 def print_section(title):
@@ -85,6 +86,28 @@ def measure_mac_ms(pattern, filter_matrix):
     return (end - start) * 1000 / REPEAT
 
 
+def make_matrix(size, value):
+    matrix = []
+
+    for _ in range(size):
+        matrix.append([value] * size)
+
+    return matrix
+
+
+def print_performance(number, sizes):
+    print_section(f"[{number}] 성능 분석 (평균/{REPEAT}회)")
+    print("크기       평균 시간(ms)    연산 횟수")
+    print("-" * 38)
+
+    for size in sizes:
+        pattern = make_matrix(size, 1.0)
+        filter_matrix = make_matrix(size, 1.0)
+        elapsed_ms = measure_mac_ms(pattern, filter_matrix)
+        label = f"{size}x{size}"
+        print(f"{label:<10}{elapsed_ms:>14.3f}{size * size:>14}")
+
+
 def run_user_mode():
     size = 3
 
@@ -112,6 +135,8 @@ def run_user_mode():
         print("판정: 판정 불가 (|A-B| < 1e-9)")
     else:
         print("판정:", result)
+
+    print_performance(4, [3])
 
 
 def normalize_label(label):
@@ -211,6 +236,8 @@ def run_json_mode():
     print_section("[2] 패턴 분석 (라벨 정규화 적용)")
     for key, case in data["patterns"].items():
         analyze_pattern(key, case, filters)
+
+    print_performance(3, PERF_SIZES)
 
 
 def main():
