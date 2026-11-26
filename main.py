@@ -1,6 +1,8 @@
 # Mini NPU Simulator
 # MAC(곱하고 더하기) 연산으로 패턴을 판별하는 콘솔 프로그램
 
+EPSILON = 1e-9
+
 
 def print_section(title):
     print()
@@ -58,6 +60,16 @@ def mac(pattern, filter_matrix):
     return total
 
 
+def judge(score_a, score_b, label_a, label_b):
+    if abs(score_a - score_b) < EPSILON:
+        return "UNDECIDED"
+
+    if score_a > score_b:
+        return label_a
+
+    return label_b
+
+
 def run_user_mode():
     size = 3
 
@@ -76,6 +88,12 @@ def run_user_mode():
     score_b = mac(pattern, filter_b)
     print("A 점수:", score_a)
     print("B 점수:", score_b)
+
+    result = judge(score_a, score_b, "A", "B")
+    if result == "UNDECIDED":
+        print("판정: 판정 불가 (|A-B| < 1e-9)")
+    else:
+        print("판정:", result)
 
 
 def run_json_mode():
