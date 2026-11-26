@@ -143,6 +143,59 @@ def load_filters(data):
     return filters
 
 
+def is_square(matrix, size):
+    if len(matrix) != size:
+        return False
+
+    for row in matrix:
+        if len(row) != size:
+            return False
+
+    return True
+
+
+def analyze_pattern(key, case, filters):
+    print(f"--- {key} ---")
+
+    try:
+        size = int(key.split("_")[1])
+    except (IndexError, ValueError):
+        print("판정: FAIL (키 형식 오류)")
+        return False, "키 형식 오류"
+
+    if size not in filters:
+        print(f"판정: FAIL (size_{size} 필터 없음)")
+        return False, f"size_{size} 필터 없음"
+
+    pattern = case["input"]
+    if not is_square(pattern, size):
+        print(f"판정: FAIL (패턴이 {size}x{size} 크기가 아님)")
+        return False, "크기 불일치"
+
+    expected = normalize_label(case["expected"])
+    if expected is None:
+        print("판정: FAIL (expected 라벨을 알 수 없음)")
+        return False, "expected 라벨 오류"
+
+    cross_score = mac(pattern, filters[size]["Cross"])
+    x_score = mac(pattern, filters[size]["X"])
+    result = judge(cross_score, x_score, "Cross", "X")
+
+    print("Cross 점수:", cross_score)
+    print("X 점수:", x_score)
+
+    if result == expected:
+        print(f"판정: {result} | expected: {expected} | PASS")
+        return True, ""
+
+    if result == "UNDECIDED":
+        reason = "동점 규칙"
+    else:
+        reason = "판정 불일치"
+    print(f"판정: {result} | expected: {expected} | FAIL ({reason})")
+    return False, reason
+
+
 def run_json_mode():
     print_section("[1] 필터 로드")
 
@@ -155,10 +208,9 @@ def run_json_mode():
 
     filters = load_filters(data)
 
-    # 확인용 출력: 다음 단계에서 패턴 분석으로 바꾼다
-    print_section("[2] 라벨 정규화 확인")
+    print_section("[2] 패턴 분석 (라벨 정규화 적용)")
     for key, case in data["patterns"].items():
-        print(key, ":", case["expected"], "→", normalize_label(case["expected"]))
+        analyze_pattern(key, case, filters)
 
 
 def main():
