@@ -1,7 +1,10 @@
 # Mini NPU Simulator
 # MAC(곱하고 더하기) 연산으로 패턴을 판별하는 콘솔 프로그램
 
+import time
+
 EPSILON = 1e-9
+REPEAT = 10
 
 
 def print_section(title):
@@ -70,6 +73,16 @@ def judge(score_a, score_b, label_a, label_b):
     return label_b
 
 
+def measure_mac_ms(pattern, filter_matrix):
+    start = time.perf_counter()
+
+    for _ in range(REPEAT):
+        mac(pattern, filter_matrix)
+
+    end = time.perf_counter()
+    return (end - start) * 1000 / REPEAT
+
+
 def run_user_mode():
     size = 3
 
@@ -88,6 +101,9 @@ def run_user_mode():
     score_b = mac(pattern, filter_b)
     print("A 점수:", score_a)
     print("B 점수:", score_b)
+
+    elapsed_ms = measure_mac_ms(pattern, filter_a)
+    print(f"연산 시간(평균/{REPEAT}회): {elapsed_ms:.3f} ms")
 
     result = judge(score_a, score_b, "A", "B")
     if result == "UNDECIDED":
