@@ -87,6 +87,35 @@ def measure_mac_ms(pattern, filter_matrix):
     return (end - start) * 1000 / REPEAT
 
 
+def flatten(matrix):
+    flat = []
+
+    for row in matrix:
+        for value in row:
+            flat.append(value)
+
+    return flat
+
+
+def mac_flat(pattern_flat, filter_flat):
+    total = 0.0
+
+    for k in range(len(pattern_flat)):
+        total += pattern_flat[k] * filter_flat[k]
+
+    return total
+
+
+def measure_flat_ms(pattern_flat, filter_flat):
+    start = time.perf_counter()
+
+    for _ in range(REPEAT):
+        mac_flat(pattern_flat, filter_flat)
+
+    end = time.perf_counter()
+    return (end - start) * 1000 / REPEAT
+
+
 def make_cross(size):
     center = size // 2
     matrix = []
@@ -120,15 +149,16 @@ def make_x(size):
 
 def print_performance(number, sizes):
     print_section(f"[{number}] 성능 분석 (평균/{REPEAT}회)")
-    print("크기       평균 시간(ms)    연산 횟수")
-    print("-" * 38)
+    print("크기         2차원(ms)     1차원(ms)    연산 횟수")
+    print("-" * 50)
 
     for size in sizes:
         pattern = make_cross(size)
         filter_matrix = make_cross(size)
-        elapsed_ms = measure_mac_ms(pattern, filter_matrix)
+        elapsed_2d = measure_mac_ms(pattern, filter_matrix)
+        elapsed_1d = measure_flat_ms(flatten(pattern), flatten(filter_matrix))
         label = f"{size}x{size}"
-        print(f"{label:<10}{elapsed_ms:>14.3f}{size * size:>14}")
+        print(f"{label:<10}{elapsed_2d:>12.3f}{elapsed_1d:>14.3f}{size * size:>14}")
 
 
 def run_user_mode():
