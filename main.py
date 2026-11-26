@@ -1,10 +1,12 @@
 # Mini NPU Simulator
 # MAC(곱하고 더하기) 연산으로 패턴을 판별하는 콘솔 프로그램
 
+import json
 import time
 
 EPSILON = 1e-9
 REPEAT = 10
+DATA_FILE = "data.json"
 
 
 def print_section(title):
@@ -112,9 +114,51 @@ def run_user_mode():
         print("판정:", result)
 
 
+def normalize_label(label):
+    text = label.strip().lower()
+
+    if text == "+" or text == "cross":
+        return "Cross"
+    if text == "x":
+        return "X"
+
+    return None
+
+
+def load_filters(data):
+    filters = {}
+
+    for size_key, labeled in data["filters"].items():
+        size = int(size_key.split("_")[1])
+        filters[size] = {}
+
+        for label, matrix in labeled.items():
+            standard = normalize_label(label)
+            if standard is not None:
+                filters[size][standard] = matrix
+
+        names = ", ".join(filters[size].keys())
+        print(f"✓ {size_key} 필터 로드 완료 ({names})")
+
+    return filters
+
+
 def run_json_mode():
     print_section("[1] 필터 로드")
-    print("(준비 중) 다음 단계에서 만듭니다.")
+
+    try:
+        with open(DATA_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as error:
+        print("data.json을 읽을 수 없습니다:", error)
+        return
+
+    filters = load_filters(data)
+
+    # 확인용 출력: 다음 단계에서 패턴 분석으로 바꾼다
+    print_section("[2] 라벨 정규화 확인")
+    for key, case in data["patterns"].items():
+        print(key, ":", case["expected"], "→", normalize_label(case["expected"]))
 
 
 def main():
