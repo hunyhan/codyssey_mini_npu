@@ -23,12 +23,13 @@ def select_mode():
         print("[모드 선택]")
         print("1. 사용자 입력 (3x3)")
         print("2. data.json 분석")
+        print("3. 패턴 생성기 (보너스)")
         choice = input("선택: ").strip()
 
-        if choice == "1" or choice == "2":
+        if choice == "1" or choice == "2" or choice == "3":
             return choice
 
-        print("입력 오류: 1 또는 2를 입력하세요.")
+        print("입력 오류: 1, 2, 3 중 하나를 입력하세요.")
 
 
 def input_matrix(name, size):
@@ -86,11 +87,33 @@ def measure_mac_ms(pattern, filter_matrix):
     return (end - start) * 1000 / REPEAT
 
 
-def make_matrix(size, value):
+def make_cross(size):
+    center = size // 2
     matrix = []
 
-    for _ in range(size):
-        matrix.append([value] * size)
+    for i in range(size):
+        row = []
+        for j in range(size):
+            if i == center or j == center:
+                row.append(1.0)
+            else:
+                row.append(0.0)
+        matrix.append(row)
+
+    return matrix
+
+
+def make_x(size):
+    matrix = []
+
+    for i in range(size):
+        row = []
+        for j in range(size):
+            if i == j or i + j == size - 1:
+                row.append(1.0)
+            else:
+                row.append(0.0)
+        matrix.append(row)
 
     return matrix
 
@@ -101,8 +124,8 @@ def print_performance(number, sizes):
     print("-" * 38)
 
     for size in sizes:
-        pattern = make_matrix(size, 1.0)
-        filter_matrix = make_matrix(size, 1.0)
+        pattern = make_cross(size)
+        filter_matrix = make_cross(size)
         elapsed_ms = measure_mac_ms(pattern, filter_matrix)
         label = f"{size}x{size}"
         print(f"{label:<10}{elapsed_ms:>14.3f}{size * size:>14}")
@@ -265,6 +288,56 @@ def run_json_mode():
     print_summary(results)
 
 
+def print_matrix(matrix):
+    for row in matrix:
+        line = ""
+        for value in row:
+            if value == 1.0:
+                line += "■ "
+            else:
+                line += "□ "
+        print(line)
+
+
+def input_odd_size():
+    while True:
+        text = input("크기 N (3 이상 홀수): ").strip()
+
+        try:
+            size = int(text)
+        except ValueError:
+            print("입력 오류: 숫자를 입력하세요.")
+            continue
+
+        if size >= 3 and size % 2 == 1:
+            return size
+
+        print("입력 오류: 3 이상의 홀수를 입력하세요.")
+
+
+def run_generator_mode():
+    print_section("[1] 패턴 생성")
+    size = input_odd_size()
+    cross = make_cross(size)
+    x = make_x(size)
+
+    print()
+    print(f"Cross ({size}x{size})")
+    print_matrix(cross)
+    print()
+    print(f"X ({size}x{size})")
+    print_matrix(x)
+
+    print_section("[2] MAC 확인 (패턴: 생성한 Cross)")
+    cross_score = mac(cross, cross)
+    x_score = mac(cross, x)
+    print("Cross 필터 점수:", cross_score)
+    print("X 필터 점수:", x_score)
+    print("판정:", judge(cross_score, x_score, "Cross", "X"))
+
+    print_performance(3, [size])
+
+
 def main():
     print("╔════════════════════════════════════╗")
     print("║                                    ║")
@@ -275,8 +348,10 @@ def main():
 
     if mode == "1":
         run_user_mode()
-    else:
+    elif mode == "2":
         run_json_mode()
+    else:
+        run_generator_mode()
 
 
 try:
