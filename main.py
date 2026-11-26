@@ -221,6 +221,28 @@ def analyze_pattern(key, case, filters):
     return False, reason
 
 
+def print_summary(results):
+    print_section("[4] 결과 요약")
+
+    passed_count = 0
+    failed = []
+    for key, passed, reason in results:
+        if passed:
+            passed_count += 1
+        else:
+            failed.append((key, reason))
+
+    print(f"총 테스트: {len(results)}개")
+    print(f"통과: {passed_count}개")
+    print(f"실패: {len(failed)}개")
+
+    if failed:
+        print()
+        print("실패 케이스:")
+        for key, reason in failed:
+            print(f"- {key}: {reason}")
+
+
 def run_json_mode():
     print_section("[1] 필터 로드")
 
@@ -234,14 +256,21 @@ def run_json_mode():
     filters = load_filters(data)
 
     print_section("[2] 패턴 분석 (라벨 정규화 적용)")
+
+    results = []
     for key, case in data["patterns"].items():
-        analyze_pattern(key, case, filters)
+        passed, reason = analyze_pattern(key, case, filters)
+        results.append((key, passed, reason))
 
     print_performance(3, PERF_SIZES)
-
+    print_summary(results)
 
 def main():
-    print("=== Mini NPU Simulator ===")
+    print("╔════════════════════════════════════╗")
+    print("║                                    ║")
+    print("║         Mini NPU Simulator         ║")
+    print("║                                    ║")
+    print("╚════════════════════════════════════╝")
     mode = select_mode()
 
     if mode == "1":
